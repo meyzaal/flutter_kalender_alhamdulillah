@@ -37,6 +37,9 @@ dependencies:
   http: ^0.13.4
   intl: ^0.17.0
   table_calendar: ^3.0.3
+  flutter_localizations: 
+    sdk: flutter
+    version: ^0.0.0
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,41 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+
+// // EventModel eventFromJson(String str) => EventModel.fromJson(json.decode(str));
+
+// // String eventToJson(EventModel data) => json.encode(data.toJson());
+
+// class EventModel {
+//   String status;
+//   String message;
+//   List<Event> data;
+
+//   EventModel({
+//     required this.status,
+//     required this.message,
+//     required this.data,
+//   });
+
+//   factory EventModel.fromJson(Map<String, dynamic> json) {
+//     return EventModel(
+//       status: json["status"],
+//       message: json["message"],
+//       data: List<Event>.from(json["data"].map((x) {
+//         return Event.fromJson(x);
+//       })),
+//     );
+//   }
+
+//   Map<String, dynamic> toJson() {
+//     return {
+//       "status": status,
+//       "message": message,
+//       "data": List<Event>.from(data.map((x) => x.toMap())),
+//     };
+//   }
+// }
 
 class Event {
   final String id;
@@ -46,6 +81,12 @@ Future<List<Event>> fetchEvent() async {
   if (response.statusCode == 200) {
     List jsonResponse = json.decode(response.body);
 
+    jsonResponse.sort((a, b) {
+      return a['waktuSelesai']
+          .toString()
+          .compareTo(b['waktuSelesai'].toString());
+    });
+    print(jsonResponse);
     return jsonResponse.map((data) => Event.fromJson(data)).toList();
   } else {
     throw Exception('Failed to load Event');

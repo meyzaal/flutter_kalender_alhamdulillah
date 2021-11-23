@@ -21,19 +21,31 @@ class _EventCalendarState extends State<EventCalendar> {
   CalendarFormat _calendarFormat = CalendarFormat.week;
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
+  DateTime _current = DateTime.now();
+  // DateTime _current = DateTime.now();
+
+  // void _onVisibleDaysChanged(
+  //     DateTime first, DateTime last, CalendarFormat format) {
+  //   setState(() {
+  //     _current = first;
+  //   });
+  //   print('CALLBACK: _onVisibleDaysChanged first ${first.toIso8601String()}');
+  // }
 
   @override
   void initState() {
     super.initState();
 
     futureEvent = fetchEvent();
-    _selectedDay = _focusedDay;
+
+    // _selectedDay = _focusedDay;
+
     // _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
   }
 
   // @override
   // void dispose() {
-  //   _selectedEvents.dispose();
+  //   _current;
   //   super.dispose();
   // }
 
@@ -42,14 +54,29 @@ class _EventCalendarState extends State<EventCalendar> {
     events.forEach((event) {
       DateTime date = DateTime.utc(event.waktuSelesai.year,
           event.waktuSelesai.month, event.waktuSelesai.day, 12);
+
       if (kEvents[date] == null) kEvents[date] = [];
       kEvents[date]!.add(event);
     });
   }
 
-  List<Event> _getEventsForDay(DateTime day) {
+  List<Event> _getEventsForDay(
+    DateTime day,
+  ) {
+    // _current = day;
     // Implementation example
     return kEvents[day] ?? [];
+  }
+
+  void _onPageChanged(focusedDay) {
+    _focusedDay = focusedDay;
+    // print(_current);
+    setState(() {
+      _current = focusedDay;
+    });
+    // print(_current);
+
+    // return _current;
   }
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
@@ -59,6 +86,7 @@ class _EventCalendarState extends State<EventCalendar> {
         _focusedDay = focusedDay;
       });
 
+      // print(_current);
       // _selectedEvents.value = _getEventsForDay(selectedDay);
     }
   }
@@ -115,9 +143,19 @@ class _EventCalendarState extends State<EventCalendar> {
             // });
             if (snapshot.hasData) {
               var events = snapshot.data;
+
+              // print(events);
               _groupEvents(events!);
+
               DateTime selectedDate = _selectedDay;
+              // print(selectedDate);
+              var monthFilter = events.where((element) =>
+                  element.waktuSelesai.year == _current.year &&
+                  element.waktuSelesai.month == _current.month);
+
               final _selectedEvents = kEvents[selectedDate] ?? [];
+              print(_selectedEvents);
+
               // for (int i = 0; i < doc.length; i++) {}
               return Column(
                 children: [
@@ -206,9 +244,7 @@ class _EventCalendarState extends State<EventCalendar> {
                           });
                         }
                       },
-                      onPageChanged: (focusedDay) {
-                        _focusedDay = focusedDay;
-                      },
+                      onPageChanged: _onPageChanged,
                       calendarBuilders: CalendarBuilders(
                         singleMarkerBuilder: (context, date, event) {
                           return Container(
@@ -282,111 +318,277 @@ class _EventCalendarState extends State<EventCalendar> {
                               padding: EdgeInsets.symmetric(horizontal: 10.0),
                               child: TabBarView(
                                 children: <Widget>[
-                                  ListView.builder(
-                                    shrinkWrap: true,
-                                    // physics: NeverScrollableScrollPhysics(),
-                                    itemCount: _selectedEvents.length,
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      Event event = _selectedEvents[index];
-
-                                      // return ListTile(
-                                      //   title: Text(event.namaEvent),
-                                      //   subtitle: Text(
-                                      //       DateFormat("EEEE, dd MMMM, yyyy")
-                                      //           .format(event.waktuSelesai)),
-                                      // );
-                                      return Container(
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        padding: EdgeInsets.all(5.0),
-                                        margin: EdgeInsets.only(bottom: 5.0),
-                                        decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius:
-                                                const BorderRadius.all(
-                                              Radius.circular(10.0),
-                                            ),
-                                            border: Border.all(
-                                                color: Colors.black26)),
-                                        child: Row(
+                                  (_selectedEvents.length == 0)
+                                      ? Column(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
+                                              MainAxisAlignment.start,
                                           children: <Widget>[
-                                            Container(
-                                              height: 50.0,
-                                              width: 50.0,
-                                              decoration: const BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: Colors.blue),
-                                              child: const Icon(
-                                                Icons.quiz_outlined,
-                                                color: Colors.white,
-                                                size: 30.0,
-                                                // color: Colors.blue,
-                                              ),
+                                            Image.asset(
+                                              'assets/images/woman-thinking-while-drinking-coffee.png',
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.8,
+                                              color: Colors.blue,
                                             ),
-                                            SizedBox(width: 10.0),
-                                            Expanded(
-                                              child: Column(
+                                            Text(
+                                              'Tidak ada aktivitas hari ini',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w400,
+                                                  fontSize: 16.0),
+                                            ),
+                                          ],
+                                        )
+                                      : ListView.builder(
+                                          shrinkWrap: true,
+                                          // physics: NeverScrollableScrollPhysics(),
+                                          itemCount: _selectedEvents.length,
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
+                                            Event event =
+                                                _selectedEvents[index];
+
+                                            // return ListTile(
+                                            //   title: Text(event.namaEvent),
+                                            //   subtitle: Text(
+                                            //       DateFormat("EEEE, dd MMMM, yyyy")
+                                            //           .format(event.waktuSelesai)),
+                                            // );
+                                            return Container(
+                                              width: MediaQuery.of(context)
+                                                  .size
+                                                  .width,
+                                              padding: EdgeInsets.all(5.0),
+                                              margin:
+                                                  EdgeInsets.only(bottom: 5.0),
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      const BorderRadius.all(
+                                                    Radius.circular(10.0),
+                                                  ),
+                                                  border: Border.all(
+                                                      color: Colors.black26)),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceAround,
                                                 crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
+                                                    CrossAxisAlignment.center,
                                                 children: <Widget>[
-                                                  Text(
-                                                    // "Collection",
-                                                    event.jenisEvent,
-                                                    style: TextStyle(
-                                                        fontSize: 16.0,
-                                                        fontWeight:
-                                                            FontWeight.w300),
+                                                  Container(
+                                                    height: 50.0,
+                                                    width: 50.0,
+                                                    decoration:
+                                                        const BoxDecoration(
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            color: Colors.blue),
+                                                    child: const Icon(
+                                                      Icons.quiz_outlined,
+                                                      color: Colors.white,
+                                                      size: 30.0,
+                                                      // color: Colors.blue,
+                                                    ),
                                                   ),
-                                                  SizedBox(height: 5.0),
-                                                  Text(
-                                                    // "Quiz 1",
-                                                    event.namaEvent,
-                                                    style: TextStyle(
-                                                        fontSize: 18.0,
-                                                        fontWeight:
-                                                            FontWeight.w500),
+                                                  SizedBox(width: 10.0),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: <Widget>[
+                                                        Text(
+                                                          // "Collection",
+                                                          event.jenisEvent,
+                                                          style: TextStyle(
+                                                              fontSize: 16.0,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w300),
+                                                        ),
+                                                        SizedBox(height: 5.0),
+                                                        Text(
+                                                          // "Quiz 1",
+                                                          event.namaEvent,
+                                                          style: TextStyle(
+                                                              fontSize: 18.0,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500),
+                                                        ),
+                                                        SizedBox(height: 5.0),
+                                                        Row(
+                                                          children: <Widget>[
+                                                            Icon(
+                                                              Icons.access_time,
+                                                              size: 20.0,
+                                                            ),
+                                                            SizedBox(
+                                                                width: 5.0),
+                                                            Text(DateFormat
+                                                                        .yMMMMd(
+                                                                            'ID')
+                                                                    .format(event
+                                                                        .waktuSelesai) +
+                                                                ' - ' +
+                                                                DateFormat.Hm()
+                                                                    .format(event
+                                                                        .waktuSelesai)),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ),
-                                                  SizedBox(height: 5.0),
-                                                  Row(
-                                                    children: <Widget>[
-                                                      Icon(
-                                                        Icons.access_time,
-                                                        size: 20.0,
-                                                      ),
-                                                      SizedBox(width: 5.0),
-                                                      Text(DateFormat.yMMMMd(
-                                                                  'ID')
-                                                              .format(event
-                                                                  .waktuSelesai) +
-                                                          ' - ' +
-                                                          DateFormat.Hm()
-                                                              .format(event
-                                                                  .waktuSelesai)),
-                                                    ],
+                                                  SizedBox(width: 5.0),
+                                                  Icon(
+                                                    Icons
+                                                        .check_circle_outline_rounded,
+                                                    color: Colors.lightGreen,
+                                                    size: 30.0,
                                                   ),
                                                 ],
                                               ),
+                                            );
+                                          },
+                                        ),
+                                  // Bulan ini
+                                  (monthFilter.length == 0)
+                                      ? Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: <Widget>[
+                                            Image.asset(
+                                              'assets/images/woman-thinking-while-drinking-coffee.png',
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.8,
+                                              color: Colors.blue,
                                             ),
-                                            SizedBox(width: 5.0),
-                                            Icon(
-                                              Icons
-                                                  .check_circle_outline_rounded,
-                                              color: Colors.lightGreen,
-                                              size: 30.0,
+                                            Text(
+                                              'Tidak ada aktivitas bulan ini',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w400,
+                                                  fontSize: 16.0),
                                             ),
                                           ],
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  Center(
-                                    child: Text('he'),
-                                  ),
+                                        )
+                                      : ListView(
+                                          children: monthFilter
+                                              .map(
+                                                (e) => Container(
+                                                  width: MediaQuery.of(context)
+                                                      .size
+                                                      .width,
+                                                  padding: EdgeInsets.all(5.0),
+                                                  margin: EdgeInsets.only(
+                                                      bottom: 5.0),
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                        Radius.circular(10.0),
+                                                      ),
+                                                      border: Border.all(
+                                                          color:
+                                                              Colors.black26)),
+                                                  child: (e is Event)
+                                                      ? Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceAround,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .center,
+                                                          children: <Widget>[
+                                                            Container(
+                                                              height: 50.0,
+                                                              width: 50.0,
+                                                              decoration: const BoxDecoration(
+                                                                  shape: BoxShape
+                                                                      .circle,
+                                                                  color: Colors
+                                                                      .blue),
+                                                              child: const Icon(
+                                                                Icons
+                                                                    .quiz_outlined,
+                                                                color: Colors
+                                                                    .white,
+                                                                size: 30.0,
+                                                                // color: Colors.blue,
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                                width: 10.0),
+                                                            Expanded(
+                                                              child: Column(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: <
+                                                                    Widget>[
+                                                                  Text(
+                                                                    // "Collection",
+                                                                    e.jenisEvent,
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            16.0,
+                                                                        fontWeight:
+                                                                            FontWeight.w300),
+                                                                  ),
+                                                                  SizedBox(
+                                                                      height:
+                                                                          5.0),
+                                                                  Text(
+                                                                    // "Quiz 1",
+                                                                    e.namaEvent,
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            18.0,
+                                                                        fontWeight:
+                                                                            FontWeight.w500),
+                                                                  ),
+                                                                  SizedBox(
+                                                                      height:
+                                                                          5.0),
+                                                                  Row(
+                                                                    children: <
+                                                                        Widget>[
+                                                                      Icon(
+                                                                        Icons
+                                                                            .access_time,
+                                                                        size:
+                                                                            20.0,
+                                                                      ),
+                                                                      SizedBox(
+                                                                          width:
+                                                                              5.0),
+                                                                      Text(DateFormat.yMMMMd('ID').format(e
+                                                                              .waktuSelesai) +
+                                                                          ' - ' +
+                                                                          DateFormat.Hm()
+                                                                              .format(e.waktuSelesai)),
+                                                                    ],
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                                width: 5.0),
+                                                            Icon(
+                                                              Icons
+                                                                  .check_circle_outline_rounded,
+                                                              color: Colors
+                                                                  .lightGreen,
+                                                              size: 30.0,
+                                                            ),
+                                                          ],
+                                                        )
+                                                      : null,
+                                                ),
+                                              )
+                                              .toList()),
                                 ],
                               ),
                             ),

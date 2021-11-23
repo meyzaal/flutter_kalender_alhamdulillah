@@ -602,7 +602,10 @@ class _EventCalendarState extends State<EventCalendar> {
             } else {
               return Container(
                   height: MediaQuery.of(context).size.height,
-                  child: Center(child: CircularProgressIndicator()));
+                  child: Center(
+                      child: CircularProgressIndicator(
+                    color: Colors.white,
+                  )));
             }
           },
         ),

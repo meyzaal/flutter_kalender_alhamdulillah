@@ -14,40 +14,19 @@ class EventCalendar extends StatefulWidget {
 }
 
 class _EventCalendarState extends State<EventCalendar> {
-  // late final ValueNotifier<List<Event>> _selectedEvents;
   late LinkedHashMap<DateTime, List<Event>> kEvents;
-  // late StreamController<Map<DateTime, List>> _streamController;
   late Future<List<Event>> futureEvent;
   CalendarFormat _calendarFormat = CalendarFormat.week;
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
   DateTime _current = DateTime.now();
-  // DateTime _current = DateTime.now();
-
-  // void _onVisibleDaysChanged(
-  //     DateTime first, DateTime last, CalendarFormat format) {
-  //   setState(() {
-  //     _current = first;
-  //   });
-  //   print('CALLBACK: _onVisibleDaysChanged first ${first.toIso8601String()}');
-  // }
 
   @override
   void initState() {
     super.initState();
 
     futureEvent = fetchEvent();
-
-    // _selectedDay = _focusedDay;
-
-    // _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
   }
-
-  // @override
-  // void dispose() {
-  //   _current;
-  //   super.dispose();
-  // }
 
   _groupEvents(List<Event> events) {
     kEvents = LinkedHashMap(equals: isSameDay, hashCode: getHashCode);
@@ -63,8 +42,6 @@ class _EventCalendarState extends State<EventCalendar> {
   List<Event> _getEventsForDay(
     DateTime day,
   ) {
-    // _current = day;
-    // Implementation example
     return kEvents[day] ?? [];
   }
 
@@ -74,9 +51,6 @@ class _EventCalendarState extends State<EventCalendar> {
     setState(() {
       _current = focusedDay;
     });
-    // print(_current);
-
-    // return _current;
   }
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
@@ -85,9 +59,6 @@ class _EventCalendarState extends State<EventCalendar> {
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
       });
-
-      // print(_current);
-      // _selectedEvents.value = _getEventsForDay(selectedDay);
     }
   }
 
@@ -117,46 +88,16 @@ class _EventCalendarState extends State<EventCalendar> {
         child: StreamBuilder(
           stream: futureEvent.asStream(),
           builder: (context, AsyncSnapshot<List<Event>> snapshot) {
-            // (snapshot.data)!.forEach((element) {
-            //   _kEventSource[DateTime(
-            //     element.waktuMulai.year,
-            //     element.waktuMulai.month,
-            //     element.waktuMulai.day,
-            //   )] = _kEventSource[DateTime(
-            //             element.waktuMulai.year,
-            //             element.waktuMulai.month,
-            //             element.waktuMulai.day,
-            //           )] !=
-            //           null
-            //       ? [
-            //           ...?_kEventSource[DateTime(
-            //             element.waktuMulai.year,
-            //             element.waktuMulai.month,
-            //             element.waktuMulai.day,
-            //           )],
-            //           element
-            //         ]
-            //       : [element];
-            //   print(_kEventSource);
-            //   print('');
-            //   print(kEvents);
-            // });
             if (snapshot.hasData) {
               var events = snapshot.data;
-
-              // print(events);
               _groupEvents(events!);
-
               DateTime selectedDate = _selectedDay;
-              // print(selectedDate);
               var monthFilter = events.where((element) =>
                   element.waktuSelesai.year == _current.year &&
                   element.waktuSelesai.month == _current.month);
-
               final _selectedEvents = kEvents[selectedDate] ?? [];
               print(_selectedEvents);
 
-              // for (int i = 0; i < doc.length; i++) {}
               return Column(
                 children: [
                   Container(
@@ -196,7 +137,6 @@ class _EventCalendarState extends State<EventCalendar> {
                           fontWeight: FontWeight.w500,
                         ),
                         todayDecoration: BoxDecoration(
-                          // color: Colors.lightBlueAccent,
                           border: Border.all(color: Colors.white),
                           shape: BoxShape.circle,
                         ),
@@ -211,16 +151,9 @@ class _EventCalendarState extends State<EventCalendar> {
                       ),
                       headerStyle: HeaderStyle(
                         titleCentered: true,
-                        // formatButtonShowsNext: false,
                         formatButtonVisible: false,
                         leftChevronVisible: false,
                         rightChevronVisible: false,
-                        // leftChevronIcon: Icon(
-                        //   Icons.chevron_left_rounded,
-                        //   color: Colors.white,
-                        // ),
-                        // rightChevronIcon:
-                        //     Icon(Icons.chevron_right_rounded, color: Colors.white),
                         titleTextStyle: TextStyle(
                           color: Colors.white,
                           fontSize: 18.0,
@@ -318,10 +251,10 @@ class _EventCalendarState extends State<EventCalendar> {
                               padding: EdgeInsets.symmetric(horizontal: 10.0),
                               child: TabBarView(
                                 children: <Widget>[
+                                  // Hari ini
                                   (_selectedEvents.length == 0)
-                                      ? Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
+                                      ? ListView(
+                                          shrinkWrap: true,
                                           children: <Widget>[
                                             Image.asset(
                                               'assets/images/woman-thinking-while-drinking-coffee.png',
@@ -333,9 +266,11 @@ class _EventCalendarState extends State<EventCalendar> {
                                             ),
                                             Text(
                                               'Tidak ada aktivitas hari ini',
+                                              textAlign: TextAlign.center,
                                               style: TextStyle(
-                                                  fontWeight: FontWeight.w400,
-                                                  fontSize: 16.0),
+                                                fontWeight: FontWeight.w400,
+                                                fontSize: 16.0,
+                                              ),
                                             ),
                                           ],
                                         )
@@ -348,12 +283,6 @@ class _EventCalendarState extends State<EventCalendar> {
                                             Event event =
                                                 _selectedEvents[index];
 
-                                            // return ListTile(
-                                            //   title: Text(event.namaEvent),
-                                            //   subtitle: Text(
-                                            //       DateFormat("EEEE, dd MMMM, yyyy")
-                                            //           .format(event.waktuSelesai)),
-                                            // );
                                             return Container(
                                               width: MediaQuery.of(context)
                                                   .size
@@ -388,7 +317,6 @@ class _EventCalendarState extends State<EventCalendar> {
                                                       Icons.quiz_outlined,
                                                       color: Colors.white,
                                                       size: 30.0,
-                                                      // color: Colors.blue,
                                                     ),
                                                   ),
                                                   SizedBox(width: 10.0),
@@ -399,7 +327,6 @@ class _EventCalendarState extends State<EventCalendar> {
                                                               .start,
                                                       children: <Widget>[
                                                         Text(
-                                                          // "Collection",
                                                           event.jenisEvent,
                                                           style: TextStyle(
                                                               fontSize: 16.0,
@@ -409,7 +336,6 @@ class _EventCalendarState extends State<EventCalendar> {
                                                         ),
                                                         SizedBox(height: 5.0),
                                                         Text(
-                                                          // "Quiz 1",
                                                           event.namaEvent,
                                                           style: TextStyle(
                                                               fontSize: 18.0,
@@ -454,9 +380,8 @@ class _EventCalendarState extends State<EventCalendar> {
                                         ),
                                   // Bulan ini
                                   (monthFilter.length == 0)
-                                      ? Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
+                                      ? ListView(
+                                          shrinkWrap: true,
                                           children: <Widget>[
                                             Image.asset(
                                               'assets/images/woman-thinking-while-drinking-coffee.png',
@@ -468,9 +393,11 @@ class _EventCalendarState extends State<EventCalendar> {
                                             ),
                                             Text(
                                               'Tidak ada aktivitas bulan ini',
+                                              textAlign: TextAlign.center,
                                               style: TextStyle(
-                                                  fontWeight: FontWeight.w400,
-                                                  fontSize: 16.0),
+                                                fontWeight: FontWeight.w400,
+                                                fontSize: 16.0,
+                                              ),
                                             ),
                                           ],
                                         )
@@ -516,7 +443,6 @@ class _EventCalendarState extends State<EventCalendar> {
                                                                 color: Colors
                                                                     .white,
                                                                 size: 30.0,
-                                                                // color: Colors.blue,
                                                               ),
                                                             ),
                                                             SizedBox(
@@ -529,7 +455,6 @@ class _EventCalendarState extends State<EventCalendar> {
                                                                 children: <
                                                                     Widget>[
                                                                   Text(
-                                                                    // "Collection",
                                                                     e.jenisEvent,
                                                                     style: TextStyle(
                                                                         fontSize:
@@ -541,7 +466,6 @@ class _EventCalendarState extends State<EventCalendar> {
                                                                       height:
                                                                           5.0),
                                                                   Text(
-                                                                    // "Quiz 1",
                                                                     e.namaEvent,
                                                                     style: TextStyle(
                                                                         fontSize:
